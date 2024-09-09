@@ -8,7 +8,7 @@ def input_simulator_health():
     print("Input Simulator Health Check")
 
 
-def simulate(config):
+def simulate_with_config(config):
     if not isinstance(config, dict):
         logging.error("Input is not a valid JSON-like object")
         return
@@ -26,6 +26,14 @@ def simulate(config):
         time.sleep(delay_before)
         pg.press(skey)
         time.sleep(delay_after)
+
+
+def simulate_key(key: str):
+    if not isinstance(key, str):
+        logging.error("Input is not a valid string")
+        return
+
+    pg.press(key)
 
 
 def simulate_page_up_down():
