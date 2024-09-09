@@ -7,7 +7,27 @@ import logging
 def input_simulator_health():
     print("Input Simulator Health Check")
 
-    
+
+def simulate(config):
+    if not isinstance(config, dict):
+        logging.error("Input is not a valid JSON-like object")
+        return
+
+    skey = config.get('skey')
+    delay_before = config.get('delay_before', 0)
+    delay_after = config.get('delay_after', 0)
+    repeat = config.get('repeat', 1)
+
+    if not skey:
+        logging.error("No 'skey' found in the input object")
+        return
+
+    for _ in range(repeat):
+        time.sleep(delay_before)
+        pg.press(skey)
+        time.sleep(delay_after)
+
+
 def simulate_page_up_down():
     time.sleep(5) 
     # Simulate pressing Page Down
