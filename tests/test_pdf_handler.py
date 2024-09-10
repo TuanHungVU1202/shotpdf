@@ -11,11 +11,11 @@ class TestPDFHandler(unittest.TestCase):
     def setUpClass(cls):
         cls.temp_dir = tempfile.mkdtemp()
         # Create 3 images with different extensions
-        cls.create_test_image('image1.png', 800)
+        cls.create_test_image('image1.png', 500)
         cls.create_test_image('image2.jpg', 900)
-        cls.create_test_image('image3.bmp', 1000)
+        cls.create_test_image('image3.bmp', 3000)
         # Create a text file
-        cls.create_test_text_file('not_an_image.txt', 700)
+        cls.create_test_text_file('not_an_image.txt', 800)
 
     @classmethod
     def tearDownClass(cls):
@@ -26,8 +26,8 @@ class TestPDFHandler(unittest.TestCase):
     @classmethod
     def create_test_image(cls, filename, creation_time):
         path = os.path.join(cls.temp_dir, filename)
-        img = Image.new('RGB', (100, 100), color='red')
-        img.save(path)
+        with Image.new('RGB', (100, 100), color='red') as img:
+            img.save(path)
         os.utime(path, (creation_time, creation_time))
 
     @classmethod
