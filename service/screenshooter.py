@@ -59,7 +59,7 @@ def save_screenshot(screenshot: Image.Image, save_path: str = None) -> str:
         else:
             # Check if the save_path is a directory or an image file
             _, ext = os.path.splitext(save_path)
-            if ext.lower() not in ['.png', '.jpg', '.jpeg', '.tif']:
+            if ext.lower() not in ['.png', '.jpg', '.jpeg', '.tiff', '.bmp']:
                 # It's a directory, so we need to generate a filename
                 if not os.path.exists(save_path):
                     os.makedirs(save_path)
