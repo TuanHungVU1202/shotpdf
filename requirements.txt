@@ -13,3 +13,4 @@ pytweening==1.2.0
 rubicon-objc==0.4.9; sys_platform == 'darwin'
 python-xlib==0.33; sys_platform == 'linux'
 pynput==1.7.6; sys_platform == 'linux'
+reportlab==4.0.0
