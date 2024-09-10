@@ -3,22 +3,22 @@ from PIL import Image
 from reportlab.pdfgen import canvas # type: ignore
 from reportlab.lib.units import inch # type: ignore
 
-def get_images_sorted_by_creation(directory):
+def get_images_sorted_by_modification(directory):
     """
-    Get a list of image files in the given directory, sorted by creation date.
+    Get a list of image files in the given directory, sorted by modification date.
     
     Args:
     directory (str): Path to the directory containing images.
     
     Returns:
-    list: Sorted list of image file paths.
+    list: Sorted list of image file paths, ordered by last modification time.
     """
     image_extensions = ('.png', '.jpg', '.jpeg', '.tiff', '.bmp')
     image_files = [
         os.path.join(directory, f) for f in os.listdir(directory)
         if f.lower().endswith(image_extensions)
     ]
-    return sorted(image_files, key=os.path.getctime)
+    return sorted(image_files, key=os.path.getmtime)
 
 
 def save_images_to_pdf(directory, output_pdf='output.pdf'):
@@ -32,7 +32,7 @@ def save_images_to_pdf(directory, output_pdf='output.pdf'):
     Returns:
     str: Path to the created PDF file.
     """
-    image_files = get_images_sorted_by_creation(directory)
+    image_files = get_images_sorted_by_modification(directory)
     
     if not image_files:
         print(f"No image files found in {directory}")
@@ -65,7 +65,7 @@ def append_images_to_pdf(directory, existing_pdf):
     Returns:
     str: Path to the updated PDF file.
     """
-    image_files = get_images_sorted_by_creation(directory)
+    image_files = get_images_sorted_by_modification(directory)
     
     if not image_files:
         print(f"No image files found in {directory}")

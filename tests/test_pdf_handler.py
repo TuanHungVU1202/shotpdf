@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import os
 import tempfile
 from PIL import Image
-from service.pdf_handler import get_images_sorted_by_creation, save_images_to_pdf, append_images_to_pdf
+from service.pdf_handler import get_images_sorted_by_modification, save_images_to_pdf, append_images_to_pdf
 
 class TestPDFHandler(unittest.TestCase):
 
@@ -24,21 +24,21 @@ class TestPDFHandler(unittest.TestCase):
         os.rmdir(cls.temp_dir)
 
     @classmethod
-    def create_test_image(cls, filename, creation_time):
+    def create_test_image(cls, filename, modified_time):
         path = os.path.join(cls.temp_dir, filename)
         with Image.new('RGB', (100, 100), color='red') as img:
             img.save(path)
-        os.utime(path, (creation_time, creation_time))
+        os.utime(path, (modified_time, modified_time))
 
     @classmethod
-    def create_test_text_file(cls, filename, creation_time):
+    def create_test_text_file(cls, filename, modified_time):
         path = os.path.join(cls.temp_dir, filename)
         with open(path, 'w') as f:
             f.write('This is not an image')
-        os.utime(path, (creation_time, creation_time))
+        os.utime(path, (modified_time, modified_time))
 
-    def test_get_images_sorted_by_creation(self):
-        result = get_images_sorted_by_creation(self.temp_dir)
+    def test_get_images_sorted_by_modification(self):
+        result = get_images_sorted_by_modification(self.temp_dir)
 
         expected = [
             os.path.join(self.temp_dir, 'image1.png'),
