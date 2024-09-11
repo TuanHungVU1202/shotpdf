@@ -7,13 +7,10 @@ from service.input_simulator import *
 from service.input_simulator import parse_json_file, simulate_key
 
 
-def main():
-    json_data = parse_json_file('resources/single_key.json')
-    json_data['delay_before'] = 0.5
-    json_data['delay_after'] = 0.5
-    
+def parse_arguments():
     if len(sys.argv) < 3:
         print("Usage: python main.py -c <repeat_count> -d <save_directory>")
+        sys.exit(1)
 
     repeat = None
     save_directory = None
@@ -37,18 +34,15 @@ def main():
         else:
             i += 1
 
-    if save_directory is None:
-        print("Save directory must be provided.")
+    if save_directory is None or save_directory.strip() == '':
+        print("Save directory must be provided and cannot be blank.")
         sys.exit(1)
     
     if repeat is None:
+        json_data = parse_json_file('resources/single_key.json')
         print(f"Repeat count not provided. Using default value from JSON: {json_data.get('repeat', 1)}")
         repeat = json_data.get('repeat', 1)
 
-    if not save_directory or save_directory.strip() == '':
-        print("Save directory not provided or is blank. Terminating.")
-        sys.exit(1)
-    
     if not os.path.exists(save_directory):
         try:
             os.makedirs(save_directory)
@@ -56,6 +50,14 @@ def main():
         except OSError as e:
             print(f"Error creating directory {save_directory}: {e}")
             sys.exit(1)
+
+    return repeat, save_directory
+
+
+def simulate_keys_and_take_screenshots(repeat, save_directory):
+    json_data = parse_json_file('resources/single_key.json')
+    json_data['delay_before'] = 0.5
+    json_data['delay_after'] = 0.5
 
     print("Waiting 5 seconds before starting...")
     for i in range(5, 0, -1):
@@ -75,9 +77,17 @@ def main():
         else:
             print(f"Failed to take screenshot on iteration {i+1}")
 
+
+def save_images_to_pdf_file(save_directory):
     pdf_path = os.path.join(save_directory, "output.pdf")
     save_images_to_pdf(save_directory, pdf_path)
     print(f"PDF saved to {pdf_path}")
+
+
+def main():
+    repeat, save_directory = parse_arguments()
+    simulate_keys_and_take_screenshots(repeat, save_directory)
+    save_images_to_pdf_file(save_directory)
 
 
 if __name__ == "__main__":
