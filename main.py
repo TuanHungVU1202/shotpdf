@@ -1,19 +1,21 @@
+import multiprocessing
 import sys
 import time
 import os
-from service.screenshooter import take_screenshot, save_screenshot
+from typing import Optional, Tuple
+from service.screenshooter import draw_roi, take_screenshot, save_screenshot, take_screenshot_roi
 from service.pdf_handler import save_images_to_pdf
 from service.input_simulator import *
-from service.input_simulator import parse_json_file, simulate_key
 
 
 def parse_arguments():
     if len(sys.argv) < 3:
-        print("Usage: python main.py -c <repeat_count> -d <save_directory>")
+        print("Usage: python main.py -c <repeat_count> -d <save_directory> [-r]")
         sys.exit(1)
 
     repeat = None
     save_directory = None
+    fullscreen = True
 
     i = 1
     while i < len(sys.argv):
@@ -31,6 +33,9 @@ def parse_arguments():
             else:
                 print("Error: -d option requires a value")
                 sys.exit(1)
+        elif sys.argv[i] == '-r':
+            fullscreen = False
+            i += 1
         else:
             i += 1
 
@@ -51,13 +56,18 @@ def parse_arguments():
             print(f"Error creating directory {save_directory}: {e}")
             sys.exit(1)
 
-    return repeat, save_directory
+    return repeat, save_directory, fullscreen
 
 
-def simulate_keys_and_take_screenshots(repeat, save_directory):
+def simulate_keys_and_take_screenshots(
+        repeat: int, 
+        save_directory: str, 
+        roi: Optional[Tuple[int, int, int, int]] = None
+    ):
+    
     json_data = parse_json_file('resources/single_key.json')
-    json_data['delay_before'] = 0.5
-    json_data['delay_after'] = 0.5
+    json_data['delay_before'] = 1
+    json_data['delay_after'] = 1
 
     print("Waiting 5 seconds before starting...")
     for i in range(5, 0, -1):
@@ -65,28 +75,43 @@ def simulate_keys_and_take_screenshots(repeat, save_directory):
         time.sleep(1)
 
     for i in range(repeat):
-        print(f"Take screenshot {i+1}/{repeat}")
         time.sleep(json_data['delay_before'])
-        simulate_key(json_data['skey'])
-        time.sleep(json_data['delay_after'])
         
-        screenshot = take_screenshot()
+        print(f"Take screenshot {i+1}/{repeat}")
+        screenshot = None
+        
+        if roi is None:
+            screenshot = take_screenshot()
+        else:
+            screenshot = take_screenshot_roi(roi)
+
         if screenshot:
             save_path = os.path.join(save_directory, f"screenshot_{i+1}.png")
             save_screenshot(screenshot, save_path)
         else:
             print(f"Failed to take screenshot on iteration {i+1}")
 
+        simulate_key(json_data['skey'])
+        time.sleep(json_data['delay_after'])
 
-def save_images_to_pdf_file(save_directory):
+
+def save_images_to_pdf_file(save_directory: str):
     pdf_path = os.path.join(save_directory, "output.pdf")
     save_images_to_pdf(save_directory, pdf_path)
     print(f"PDF saved to {pdf_path}")
 
 
 def main():
-    repeat, save_directory = parse_arguments()
-    simulate_keys_and_take_screenshots(repeat, save_directory)
+    repeat, save_directory, fullscreen = parse_arguments()
+
+    roi = None
+    if not fullscreen:
+        with multiprocessing.Pool(processes=1) as pool:
+            roi = pool.apply(draw_roi)
+    
+    print("Waiting 10 seconds before starting...")
+    time.sleep(10)
+    simulate_keys_and_take_screenshots(repeat, save_directory, roi)
     save_images_to_pdf_file(save_directory)
 
 
