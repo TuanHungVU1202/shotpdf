@@ -9,6 +9,23 @@ from service.input_simulator import *
 
 
 def parse_arguments():
+    """
+    Parse command-line arguments for the script.
+
+    This function processes the command-line arguments to determine:
+    - The number of times to repeat the screenshot and key press process.
+    - The directory where screenshots and the final PDF should be saved.
+    - Whether to capture fullscreen screenshots or a region of interest.
+
+    If the repeat count is not provided, it uses a default value from a JSON configuration file.
+    If the specified save directory doesn't exist, it attempts to create it.
+
+    Returns:
+        tuple: A tuple containing (repeat_count, save_directory, fullscreen_mode).
+
+    Raises:
+        SystemExit: If required arguments are missing or if there's an error creating the save directory.
+    """
     if len(sys.argv) < 3:
         print("Usage: python main.py -c <repeat_count> -d <save_directory> [-r]")
         sys.exit(1)
@@ -64,6 +81,24 @@ def simulate_keys_and_take_screenshots(
         save_directory: str, 
         roi: Optional[Tuple[int, int, int, int]] = None
     ):
+    """
+    Simulate key presses and capture screenshots for a specified number of iterations.
+
+    This function performs the following steps for each iteration:
+    1. Waits for a specified delay before taking a screenshot.
+    2. Captures a screenshot (either fullscreen or of a specified region).
+    3. Saves the screenshot to the specified directory.
+    4. Simulates a key press based on the configuration in 'resources/single_key.json'.
+    5. Waits for a specified delay after the key press.
+
+    Args:
+        repeat (int): Number of times to repeat the process.
+        save_directory (str): Directory to save the captured screenshots.
+        roi (Optional[Tuple[int, int, int, int]]): Region of interest for screenshots. If None, captures fullscreen.
+
+    Note:
+        The function reads key press and delay configurations from 'resources/single_key.json'.
+    """
     
     json_data = parse_json_file('resources/single_key.json')
     json_data['delay_before'] = 1
@@ -96,12 +131,39 @@ def simulate_keys_and_take_screenshots(
 
 
 def save_images_to_pdf_file(save_directory: str):
+    """
+    Compile all captured screenshots in the save directory into a single PDF file.
+
+    This function:
+    1. Determines the path for the output PDF file.
+    2. Calls the 'save_images_to_pdf' function to create the PDF from the screenshots.
+    3. Prints a confirmation message with the path of the saved PDF.
+
+    Args:
+        save_directory (str): Directory containing the screenshot images.
+
+    Note:
+        The output PDF will be named 'output.pdf' and saved in the same directory as the screenshots.
+    """
     pdf_path = os.path.join(save_directory, "output.pdf")
     save_images_to_pdf(save_directory, pdf_path)
     print(f"PDF saved to {pdf_path}")
 
 
 def main():
+    """
+    Main function to orchestrate the screenshot capture and key simulation process.
+
+    This function:
+    1. Parses command-line arguments to get process parameters.
+    2. If not in fullscreen mode, uses multiprocessing to allow the user to select a region of interest.
+    3. Waits for 10 seconds before starting the main process.
+    4. Calls the function to simulate key presses and take screenshots.
+    5. Compiles all captured screenshots into a single PDF file.
+
+    Note:
+        Multiprocessing is used for the ROI selection to handle potential GUI operations safely.
+    """
     repeat, save_directory, fullscreen = parse_arguments()
 
     roi = None
