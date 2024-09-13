@@ -5,10 +5,25 @@ import logging
 
 
 def input_simulator_health():
+    """
+    Perform a health check for the Input Simulator.
+
+    This function prints a message indicating that the Input Simulator health check is being performed.
+    """
     print("Input Simulator Health Check")
 
 
 def simulate_with_config(config):
+    """
+    Simulate key presses based on the provided configuration.
+
+    Args:
+    config (dict): A dictionary containing the simulation configuration.
+                   Expected keys: 'skey', 'delay_before', 'delay_after', 'repeat'
+
+    The function validates the input, then simulates key presses according to the configuration.
+    It logs an error if the input is invalid or if the required 'skey' is missing.
+    """
     if not isinstance(config, dict):
         logging.error("Input is not a valid JSON-like object")
         return
@@ -29,6 +44,15 @@ def simulate_with_config(config):
 
 
 def simulate_key(key: str):
+    """
+    Simulate a single key press.
+
+    Args:
+    key (str): The key to be pressed.
+
+    The function checks if the input is a valid string and logs an error if it's not.
+    If valid, it simulates pressing the specified key.
+    """
     if not isinstance(key, str):
         logging.error("Input is not a valid string")
         return
@@ -37,6 +61,12 @@ def simulate_key(key: str):
 
 
 def simulate_page_up_down():
+    """
+    Simulate pressing Page Down and Page Up keys with delays.
+
+    This function waits for 5 seconds, then simulates pressing the Page Down key,
+    waits for 1 second, simulates pressing the Page Up key, and waits for another second.
+    """
     time.sleep(5) 
     # Simulate pressing Page Down
     pg.press('pagedown')
@@ -48,6 +78,18 @@ def simulate_page_up_down():
 
 
 def parse_json_file(path: str):
+    """
+    Parse a JSON file and extract specific keys.
+
+    Args:
+    path (str): The file path of the JSON file to be parsed.
+
+    Returns:
+    dict: A dictionary containing the parsed data with specific keys.
+
+    This function attempts to read and parse a JSON file, extracting only specific
+    valid keys. It handles various exceptions and logs errors accordingly.
+    """
     try:
         with open(path, 'r') as file:
             data = json.load(file)
@@ -78,6 +120,9 @@ def replace_json_value(json_object, new_key, new_value):
 
     Returns:
     dict: A new object with all key-value pairs, including the replaced one.
+
+    This function creates a copy of the input object, replaces or adds the specified
+    key-value pair, and returns the new object. It logs warnings or errors as needed.
     """
     if not isinstance(json_object, dict):
         logging.error("Input is not a valid JSON-like object")
